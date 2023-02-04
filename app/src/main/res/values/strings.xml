@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">titkov</string>
+    <string name="genre_and_year_placeholder">$1%s ($2%s)</string>
+</resources>
