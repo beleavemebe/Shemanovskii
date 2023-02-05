@@ -53,14 +53,19 @@ class FilmListViewModel @AssistedInject constructor(
                 }
             }.collect {
                 reduce { prevState ->
-                    prevState.copy(isLoading = false, films = it)
+                    prevState.copy(isLoading = false, films = it, error = null)
                 }
             }
         }
     }
 
     private fun reloadFilms() = execute {
+        showLoader()
         filmRepository.loadPopularFilms()
+    }
+
+    private fun showLoader() = reduce { prevState ->
+        prevState.copy(isLoading = true)
     }
 
     private fun updateSearchQuery(query: String?) = reduce { prevState ->
