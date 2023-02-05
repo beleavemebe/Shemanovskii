@@ -10,9 +10,7 @@ import com.example.titkov.ui.state
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onEach
 import java.io.IOException
 
 class FilmListViewModel @AssistedInject constructor(
@@ -41,22 +39,7 @@ class FilmListViewModel @AssistedInject constructor(
 
     init {
         reloadFilms()
-        collectContentFlow()
-    }
-
-    private fun collectContentFlow() {
-        execute {
-            viewState.flatMapLatest { state ->
-                when (state.currentFilmListType) {
-                    POPULAR -> filmRepository.popularFilmsFlow
-                    FAVORITES -> filmRepository.favoriteFilmsFlow
-                }
-            }.collect {
-                reduce { prevState ->
-                    prevState.copy(isLoading = false, films = it, error = null)
-                }
-            }
-        }
+        subscribeToContentFlow()
     }
 
     private fun reloadFilms() = execute {
@@ -66,6 +49,19 @@ class FilmListViewModel @AssistedInject constructor(
 
     private fun showLoader() = reduce { prevState ->
         prevState.copy(isLoading = true)
+    }
+
+    private fun subscribeToContentFlow() = execute {
+        viewState.flatMapLatest { state ->
+            when (state.currentFilmListType) {
+                POPULAR -> filmRepository.popularFilmsFlow
+                FAVORITES -> filmRepository.favoriteFilmsFlow
+            }
+        }.collect(::updateFilms)
+    }
+
+    private fun updateFilms(films: List<FilmPreview>) = reduce { prevState ->
+        prevState.copy(isLoading = false, films = films, error = null)
     }
 
     private fun updateSearchQuery(query: String?) = reduce { prevState ->
@@ -95,9 +91,7 @@ class FilmListViewModel @AssistedInject constructor(
         }
     }
 
-    private fun showError(
-        throwable: Throwable
-    ) = reduce { prevState ->
+    private fun showError(throwable: Throwable) = reduce { prevState ->
         prevState.copy(
             isLoading = false,
             error = throwable
