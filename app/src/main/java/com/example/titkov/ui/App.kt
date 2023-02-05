@@ -10,10 +10,6 @@ class App : Application() {
         DaggerAppComponent.factory()
             .create(this)
     }
-
-    override fun onCreate() {
-        super.onCreate()
-    }
 }
 
 val Context.appComponent: AppComponent
