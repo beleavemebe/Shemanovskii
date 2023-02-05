@@ -23,37 +23,22 @@ class FilmRepositoryImpl @Inject constructor(
     private val favoriteFilmsDao: FavoriteFilmsDao,
 ) : FilmRepository, CachedResource by CachedResource.Delegate() {
     private val favFilmsFlow = favoriteFilmsDao.getDataFlow()
-    private val _popularFilmsFlow = MutableSharedFlow<List<FilmPreview>>()
+    private val _popularFilmsFlow = MutableStateFlow<List<FilmPreview>?>(null)
     private val searchQuery = MutableStateFlow<String?>(null)
 
-//    override val popularFilmsFlow =
-//        _popularFilmsFlow.combine(favFilmsFlow) { topFilms, favoriteFilms ->
-//            val favFilmIds = favoriteFilms.map { it.filmId }
-//
-//            topFilms.map { film ->
-//                if (film.id !in favFilmIds) {
-//                    film
-//                } else {
-//                    film.copy(isInFavorites = true)
-//                }
-//            }
-//        }.combine(searchQuery) { films, q ->
-//            films.matchedToQuery(q)
-//        }
-//
     override val popularFilmsFlow = combine(
         _popularFilmsFlow, favFilmsFlow, searchQuery
     ) { topFilms, favoriteFilms, query ->
         val favFilmIds = favoriteFilms.map { it.filmId }
 
-        topFilms.map { film ->
+        topFilms?.map { film ->
             if (film.id !in favFilmIds) {
                 film
             } else {
                 film.copy(isInFavorites = true)
             }
-        }.matchedToQuery(query)
-    }
+        }?.matchedToQuery(query)
+    }.filterNotNull()
 
     override fun setSearchQuery(query: String?) {
         searchQuery.value = query
@@ -139,9 +124,7 @@ class FilmRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun List<FilmPreview>.matchedToQuery(
-        query: String? = searchQuery.value
-    ): List<FilmPreview> {
+    private fun List<FilmPreview>.matchedToQuery(query: String?): List<FilmPreview> {
         return if (query == null) {
             this
         } else mapNotNull { preview ->
