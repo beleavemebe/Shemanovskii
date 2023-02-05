@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -26,11 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
-import com.example.titkov.ui.EventConsumer
 import com.example.titkov.R
 import com.example.titkov.domain.model.Film
+import com.example.titkov.ui.EventConsumer
 import com.example.titkov.ui.appComponent
-import com.example.titkov.ui.feature.film_details.FilmDetailsEvent.*
+import com.example.titkov.ui.feature.film_details.FilmDetailsEvent.ClickBack
 import com.example.titkov.ui.theme.Background
 import com.example.titkov.ui.theme.Blue
 import com.example.titkov.ui.theme.TextSecondary
@@ -87,14 +88,44 @@ fun FilmDetailsContent(state: FilmDetailsState) {
             .background(Background)
     ) {
         if (state.isLoading) {
-            // todo share loading
+            Loading()
         } else if (state.error != null) {
-            // todo share error
+            Error()
         } else if (state.film != null) {
             FilmDetails(state.film)
         }
 
         BackButton()
+    }
+}
+
+@Composable
+private fun Loading() {
+    CircularProgressIndicator(
+        color = Blue
+    )
+}
+
+@Composable
+private fun Error() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(40.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_error),
+            contentDescription = null,
+            tint = Blue,
+            modifier = Modifier.size(100.dp),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.network_error),
+            style = Typography.body1.copy(fontWeight = FontWeight.Medium),
+            color = Blue,
+        )
     }
 }
 
