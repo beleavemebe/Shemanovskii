@@ -39,17 +39,19 @@ class FilmListViewModel @AssistedInject constructor(
         }
     }
 
-    private val contentFlow = viewState.flatMapLatest { state ->
-        when (state.currentFilmListType) {
-            POPULAR -> filmRepository.popularFilmsFlow
-            FAVORITES -> filmRepository.favoriteFilmsFlow
-        }
-    }
-
     init {
         reloadFilms()
+        collectContentFlow()
+    }
+
+    private fun collectContentFlow() {
         execute {
-            contentFlow.collect {
+            viewState.flatMapLatest { state ->
+                when (state.currentFilmListType) {
+                    POPULAR -> filmRepository.popularFilmsFlow
+                    FAVORITES -> filmRepository.favoriteFilmsFlow
+                }
+            }.collect {
                 reduce { prevState ->
                     prevState.copy(isLoading = false, films = it)
                 }
@@ -70,6 +72,7 @@ class FilmListViewModel @AssistedInject constructor(
         if (state.currentFilmListType == type) {
             prevState
         } else {
+            reloadFilms()
             prevState.copy(currentFilmListType = type, error = null)
         }
     }

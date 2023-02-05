@@ -85,13 +85,9 @@ private fun FilmListContent(state: FilmListState) {
         ) {
             if (state.isLoading) {
                 Loading()
-            }
-
-            if (state.error != null) {
+            } else if (state.error != null) {
                 Error()
-            }
-
-            if (state.films.isEmpty()) {
+            } else if (state.films.isEmpty()) {
                 Emptiness(state.currentFilmListType)
             } else {
                 Spacer(modifier = Modifier.height(12.dp))
