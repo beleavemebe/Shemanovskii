@@ -2,7 +2,6 @@ package com.example.titkov.ui
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.example.titkov.R
 import com.example.titkov.ui.feature.film_details.FilmDetailsFragment
